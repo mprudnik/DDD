@@ -15,6 +15,6 @@ module.exports = {
     password: 'marcus',
   },
   transport: 'http', // http || ws
-  framework: 'native', // native || fastify
+  framework: 'fastify', // native || fastify
   logger: 'custom', // custom || pino
 };

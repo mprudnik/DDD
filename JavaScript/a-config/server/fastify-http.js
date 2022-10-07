@@ -14,7 +14,7 @@ module.exports = (logger) => (routing, port) => {
   const serviceNames = Object.keys(routing);
   for (const serviceName of serviceNames) {
     const service = routing[serviceName];
-    fastify.register(generateFastifyService(service), { prefix: '/' + serviceName });
+    fastify.register(generateService(service), { prefix: '/' + serviceName });
   }
 
   fastify.listen({ port }, function (err) {
@@ -27,12 +27,22 @@ module.exports = (logger) => (routing, port) => {
   })
 }
 
-const generateFastifyService = (service) => async (fastify) => {
+const generateService = (service) => async (fastify) => {
   const methods = Object.keys(service);
   for (const method of methods) {
     const handler = service[method];
-    fastify.post('/' + method, async (req, reply) => {      
-      const result = await handler(...req.body);
+    const src = handler.toString();
+    const signature = src.substring(0, src.indexOf(')'));
+    const requiresId = signature.includes('(id');
+    const requiresBody = signature.includes('{');
+    let path = '/' + method;
+    if (requiresId) path += method === 'read' ? '/:id?' : '/:id';
+    fastify.post(path, async (req, reply) => {
+      const args = [];
+      if (requiresId) args.push(req.params.id);
+      if (requiresBody) args.push(...req.body);
+      
+      const result = await handler(...args);
 
       reply.statusCode = 200;
       reply.send(result.rows);

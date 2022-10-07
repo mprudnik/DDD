@@ -26,8 +26,9 @@ const generateWsCall = (name, method, socket) => (...args) => new Promise((resol
   };
 });
 
-const generateHttpCall = (name, method, baseUrl) => (...args) => new Promise((resolve) => {
-  const url = `${baseUrl}/${name}/${method}`;
+const generateHttpCall = (name, method, params, baseUrl) => (...args) => new Promise((resolve) => {
+  let url = `${baseUrl}/${name}/${method}`;
+  if (params[0] === 'id' && args.length) url += '/' + args.shift();
   const body = JSON.stringify(args);
 
   fetch(url, {
@@ -51,7 +52,7 @@ const scaffold = (url, structure) => {
     for (const methodName of methods) {
       api[serviceName][methodName] = isWS
         ? generateWsCall(serviceName, methodName, socket)
-        : generateHttpCall(serviceName, methodName, url)
+        : generateHttpCall(serviceName, methodName, service[methodName], url)
     }
   }
   
@@ -63,6 +64,6 @@ const scaffold = (url, structure) => {
 
 (async () => {
   const api = await scaffold(url, structure);
-  const data = await api.user.read();
+  const data = await api.user.read(2);
   console.dir({ data });
 })()

@@ -26,13 +26,17 @@ module.exports = (logger) => (routing, port) => {
     }
 
     const { url, socket } = req;
-    const [name, method] = url.substring(1).split('/');
+    const [name, method, id] = url.substring(1).split('/');
     logger.log(`${socket.remoteAddress} ${method} ${url}`);
     const entity = routing[name];
     if (!entity) return res.end('Not found');
     const handler = entity[method];
     if (!handler) return res.end('Not found');
-    const args = await receiveArgs(req);
+    const src = handler.toString();
+    const signature = src.substring(0, src.indexOf(')'));
+    const args = [];
+    if (signature.includes('(id')) args.push(id);
+    if (signature.includes('{')) args.push(await receiveArgs(req));
 
     const result = await handler(...args);
 
