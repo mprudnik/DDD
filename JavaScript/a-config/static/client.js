@@ -1,29 +1,7 @@
 'use strict';
 
-const socket = new WebSocket('ws://127.0.0.1:8001/');
-
-const scaffold = (structure) => {
-  const api = {};
-  const services = Object.keys(structure);
-  for (const serviceName of services) {
-    api[serviceName] = {};
-    const service = structure[serviceName];
-    const methods = Object.keys(service);
-    for (const methodName of methods) {
-      api[serviceName][methodName] = (...args) => new Promise((resolve) => {
-        const packet = { name: serviceName, method: methodName, args };
-        socket.send(JSON.stringify(packet));
-        socket.onmessage = (event) => {
-          const data = JSON.parse(event.data);
-          resolve(data);
-        };
-      });
-    }
-  }
-  return api;
-};
-
-const api = scaffold({
+const url = 'http://127.0.0.1:8001';
+const structure = {
   user: {
     create: ['record'],
     read: ['id'],
@@ -36,9 +14,55 @@ const api = scaffold({
     delete: ['id'],
     find: ['mask'],
   },
+}
+
+const generateWsCall = (name, method, socket) => (...args) => new Promise((resolve) => {  
+  const packet = { name, method, args };
+  const message = JSON.stringify(packet);
+  socket.send(message);
+  socket.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    resolve(data);
+  };
 });
 
-socket.addEventListener('open', async () => {
-  const data = await api.user.read(3);
+const generateHttpCall = (name, method, baseUrl) => (...args) => new Promise((resolve) => {
+  const url = `${baseUrl}/${name}/${method}`;
+  const body = JSON.stringify(args);
+
+  fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body,
+  }).then((res) => {
+    resolve(res.json());
+  })
+})
+
+const scaffold = (url, structure) => {
+  const isWS = url.startsWith('ws');
+  const socket = isWS ? new WebSocket(url) : null;
+  const api = {};
+  const services = Object.keys(structure);
+  for (const serviceName of services) {
+    api[serviceName] = {};
+    const service = structure[serviceName];
+    const methods = Object.keys(service);
+    for (const methodName of methods) {
+      api[serviceName][methodName] = isWS
+        ? generateWsCall(serviceName, methodName, socket)
+        : generateHttpCall(serviceName, methodName, url)
+    }
+  }
+  
+  return new Promise((resolve) => !isWS
+    ? resolve(api)
+    : socket.addEventListener('open', () => resolve(api))
+  );
+};
+
+(async () => {
+  const api = await scaffold(url, structure);
+  const data = await api.user.read();
   console.dir({ data });
-});
+})()

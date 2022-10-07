@@ -7,10 +7,6 @@ module.exports = {
   api: {
     port: 8001,
   },
-  sandbox: {
-    timeout: 5000,
-    displayErrors: false,
-  },
   db: {
     host: '127.0.0.1',
     port: 5432,
@@ -18,4 +14,7 @@ module.exports = {
     user: 'marcus',
     password: 'marcus',
   },
+  transport: 'http', // http || ws
+  framework: 'native', // native || fastify
+  logger: 'custom', // custom || pino
 };

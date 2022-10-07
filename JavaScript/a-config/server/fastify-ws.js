@@ -1,9 +1,8 @@
 'use strict';
 
-const console = require('./logger.js');
 const { Server } = require('ws');
 
-module.exports = (routing, port) => {
+module.exports = (logger) => (routing, port) => {
   const ws = new Server({ port });
 
   ws.on('connection', (connection, req) => {
@@ -17,16 +16,16 @@ module.exports = (routing, port) => {
       if (!handler) return connection.send('"Not found"', { binary: false });
       const json = JSON.stringify(args);
       const parameters = json.substring(1, json.length - 1);
-      console.log(`${ip} ${name}.${method}(${parameters})`);
+      logger.log(`${ip} ${name}.${method}(${parameters})`);
       try {
         const result = await handler(...args);
         connection.send(JSON.stringify(result.rows), { binary: false });
       } catch (err) {
-        console.error(err);
+        logger.error(err);
         connection.send('"Server error"', { binary: false });
       }
     });
   });
 
-  console.log(`API on port ${port}`);
+  logger.log(`API on port ${port}`);
 };

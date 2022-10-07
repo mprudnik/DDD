@@ -1,4 +1,4 @@
-({
+module.exports = ({ db, common }) => ({
   read(id) {
     return db('users').read(id, ['id', 'login']);
   },
