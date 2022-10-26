@@ -1,5 +1,6 @@
-module.exports = ({ db, common }) => ({
-  read(id) {
+module.exports = ({ db, logger, common, test }) => ({
+  async read(id) {
+		logger.log({ id, hashed: await common.hash(id), text: test('test') });
     return db('users').read(id, ['id', 'login']);
   },
 

@@ -14,6 +14,12 @@ module.exports = {
     user: 'marcus',
     password: 'marcus',
   },
+	di: {
+		dir: './di',
+		options: {
+			common: { hash: {} },
+		},
+	},
   transport: 'http', // http || ws
   framework: 'fastify', // native || fastify
   logger: 'custom', // custom || pino
