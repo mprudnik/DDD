@@ -6,9 +6,9 @@ const AppError = require('../error.js');
 module.exports = async (routing, port, logger) => {
 	const server = fastify({ logger });
 
-	server.register(cors(corsOptions));
+	server.register(cors, corsOptions);
 
-	server.get(async () => 'It works');
+	server.get('/', async () => 'It works');
 
 	for (const [serviceName, routes] of Object.entries(routing)) {
 		server.register(registerRoutes(routes), { prefix: '/' + serviceName });

@@ -23,7 +23,7 @@ const HEADERS = {
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
-module.exports = (root, port, console) => {
+module.exports = (root, port, logger) => {
   http.createServer(async (req, res) => {
     const url = req.url === '/' ? '/index.html' : req.url;
     const filePath = path.join(root, url);
@@ -39,5 +39,5 @@ module.exports = (root, port, console) => {
     }
   }).listen(port);
 
-  console.log(`Static on port ${port}`);
+  logger.info(`Static on port ${port}`);
 };

@@ -13,7 +13,7 @@ const loadRoute = async (filePath, sandbox, options) => {
   return exported;
 };
 
-module.exports.routing = async (path, sandbox, sandboxOptions) => {
+module.exports.routing = async (apiPath, sandbox, sandboxOptions) => {
 	const fullPath = path.join(process.cwd(), apiPath);
 	const routing = {};
 
@@ -29,7 +29,7 @@ module.exports.routing = async (path, sandbox, sandboxOptions) => {
 			if (!fileName.endsWith('.js')) continue;
 			const routePath = path.join(servicePath, fileName);
 			const routeName = path.basename(fileName, '.js');
-			routing[serviceName][routeName] = await load(routePath, sandbox, sandboxOptions);
+			routing[serviceName][routeName] = await loadRoute(routePath, sandbox, sandboxOptions);
 		}
 	}
 

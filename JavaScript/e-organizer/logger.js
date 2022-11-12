@@ -49,7 +49,7 @@ class Logger {
     this.logger.debug(obj, msg);
   }
 
-  log(obj, msg) {
+  info(obj, msg) {
     this.logger.info(obj, msg);
   }
 
