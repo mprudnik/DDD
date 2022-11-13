@@ -1,5 +1,5 @@
 ({
 	async handler() {
-		logger.info('auth/logout');
+		logger.info({}, 'auth/logout');
 	},
 });

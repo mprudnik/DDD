@@ -11,7 +11,7 @@ module.exports = async (routing, port, logger) => {
 	server.get('/', async () => 'It works');
 
 	for (const [serviceName, routes] of Object.entries(routing)) {
-		server.register(registerRoutes(routes), { prefix: '/' + serviceName });
+		server.register(registerRoutes(routes), { prefix: '/api/' + serviceName });
 	}
 };
 

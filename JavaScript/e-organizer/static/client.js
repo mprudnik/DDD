@@ -17,6 +17,7 @@ transport.http = (url) => (structure) => {
           body: JSON.stringify({ args }),
         }).then((res) => {
           if (res.status === 200) resolve(res.json());
+					else if (res.status === 204) resolve();
           else reject(new Error(`Status Code: ${res.status}`));
         });
       });
@@ -57,13 +58,30 @@ const scaffold = (url) => {
 (async () => {
   const api = await scaffold('http://localhost:8001')({
     auth: {
-      signin: ['login', 'password'],
-      signout: [],
+			signUp: ['email', 'password', 'firstName', 'lastName'],
+      signIn: ['email', 'password'],
+      signOut: [],
       restore: ['token'],
     },
-    messenger: {
-      method: ['arg'],
-    },
+		company: {
+			addEmployee: ['companyId', 'email', 'firstName', 'lastName'],
+			create: ['ownerId', 'name', 'domain', 'description'],
+			inviteEmployee: ['companyId', 'userId'],
+		},
+		employee: {
+			list: ['companyId', 'page', 'limit', 'sortBy'],
+		},
+		project: {
+			create: ['name', 'description', 'companyId'],
+			list: ['companyId', 'page', 'limit', 'sortBy'],
+			show: ['id'],
+			update: ['id', 'name', 'description', 'startDate', 'endDate'],
+			addMember: ['projectId', 'employeeId'],
+			removeMember: ['projectId', 'employeeId'],
+		},
+		user: {
+			list: ['page', 'limit', 'sortBy'],
+		},
   });
   const data = await api.auth.signin('marcus', 'marcus');
   console.dir({ data });

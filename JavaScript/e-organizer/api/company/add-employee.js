@@ -1,6 +1,6 @@
 ({
-	async handler({ id, email, firstName, lastName }) {
-		logger.info({ id, userId }, 'company/add-employee');
+	async handler({ companyId, email, firstName, lastName }) {
+		logger.info({ companyId, email, firstName, lastName }, 'company/add-employee');
 		return { id: 'employee-id' };
 	},
 });

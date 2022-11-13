@@ -1,6 +1,6 @@
 ({
-	async handler({ login, password }) {
-		logger.info('auth/sign-in', { login, password });
+	async handler({ email, password }) {
+		logger.info({ email, password }, 'auth/sign-in');
 		return { token: 'no-token-provided' }
 	},
 });
