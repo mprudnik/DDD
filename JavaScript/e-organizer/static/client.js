@@ -10,11 +10,13 @@ transport.http = (url) => (structure) => {
     const service = structure[name];
     const methods = Object.keys(service);
     for (const method of methods) {
-      api[name][method] = (...args) => new Promise((resolve, reject) => {
-        fetch(`${url}/api/${name}/${method}`, {
+			const serviceName = camelToKebab(name);
+			const methodName = camelToKebab(method);
+      api[name][method] = (args) => new Promise((resolve, reject) => {
+        fetch(`${url}/api/${serviceName}/${methodName}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ args }),
+          body: JSON.stringify(args),
         }).then((res) => {
           if (res.status === 200) resolve(res.json());
 					else if (res.status === 204) resolve();
@@ -35,8 +37,8 @@ transport.ws = (url) => (structure) => {
     const service = structure[name];
     const methods = Object.keys(service);
     for (const method of methods) {
-      api[name][method] = (...args) => new Promise((resolve) => {
-        const packet = { name, method, args };
+      api[name][method] = (args) => new Promise((resolve) => {
+        const packet = { name: camelToKebab(name), method: camelToKebab(method), args };
         socket.send(JSON.stringify(packet));
         socket.onmessage = (event) => {
           const data = JSON.parse(event.data);
@@ -50,13 +52,18 @@ transport.ws = (url) => (structure) => {
   });
 };
 
+const camelToKebab = (name) => name
+	.split('')
+	.map((char) => char.toUpperCase() === char ? '-' + char.toLowerCase() : char)
+	.join('');
+
 const scaffold = (url) => {
   const protocol = url.startsWith('ws:') ? 'ws' : 'http';
   return transport[protocol](url);
 };
 
 (async () => {
-  const api = await scaffold('http://localhost:8001')({
+  const api = await scaffold('ws://localhost:8001')({
     auth: {
 			signUp: ['email', 'password', 'firstName', 'lastName'],
       signIn: ['email', 'password'],
@@ -83,6 +90,7 @@ const scaffold = (url) => {
 			list: ['page', 'limit', 'sortBy'],
 		},
   });
-  const data = await api.auth.signin('marcus', 'marcus');
+  const data = await api.auth.signIn({ email: 'mprudnik@email.com', password: 'mprudnik' });
   console.dir({ data });
 })();
+

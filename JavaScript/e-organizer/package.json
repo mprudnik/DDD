@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node main.js",
-		"dev": "env-cmd node main.js",
+    "dev": "env-cmd node main.js",
     "build": "prisma generate && node ./prisma/sanitize.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -17,7 +17,8 @@
     "@prisma/client": "^4.6.1",
     "fastify": "^4.9.2",
     "pino": "^8.7.0",
-    "prisma-json-schema-generator": "^3.1.1"
+    "prisma-json-schema-generator": "^3.1.1",
+    "uWebSockets.js": "github:uNetworking/uWebSockets.js#v20.15.0"
   },
   "devDependencies": {
     "env-cmd": "^10.1.0",

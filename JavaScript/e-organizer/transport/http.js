@@ -13,6 +13,10 @@ module.exports = async (routing, port, logger) => {
 	for (const [serviceName, routes] of Object.entries(routing)) {
 		server.register(registerRoutes(routes), { prefix: '/api/' + serviceName });
 	}
+
+	await server.listen({ host: '0.0.0.0', port });
+
+	logger.info(`API on port ${port}`);
 };
 
 const registerRoutes = (routes) => async (server) => {

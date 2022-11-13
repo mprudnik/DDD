@@ -1,31 +1,36 @@
 'use strict';
 
-const { Server } = require('ws');
+const { App } = require('uWebSockets.js');
 
-module.exports = (routing, port, console) => {
-  const ws = new Server({ port });
+module.exports = (routing, port, logger) => {
+  const app = new App();
 
-  ws.on('connection', (connection, req) => {
-    const ip = req.socket.remoteAddress;
-    connection.on('message', async (message) => {
+	app.ws('/*', {
+		async message(ws, msgBuff, isBinary) {
+			const ip = ab2str(ws.getRemoteAddressAsText());
+			const message = ab2str(msgBuff);
       const obj = JSON.parse(message);
       const { name, method, args = [] } = obj;
       const entity = routing[name];
-      if (!entity) return connection.send('"Not found"', { binary: false });
-      const handler = entity[method];
-      if (!handler) return connection.send('"Not found"', { binary: false });
+      if (!entity) return ws.send('"Not found"', isBinary);
+      const route = entity[method];
+      if (!route) return ws.send('"Not found"', isBinary);
       const json = JSON.stringify(args);
       const parameters = json.substring(1, json.length - 1);
-      console.log(`${ip} ${name}.${method}(${parameters})`);
+      logger.info(`${ip} ${name}.${method}(${parameters})`);
       try {
-        const result = await handler(...args);
-        connection.send(JSON.stringify(result), { binary: false });
+        const result = await route.handler(args);
+        ws.send(JSON.stringify(result), isBinary);
       } catch (err) {
         console.error(err);
-        connection.send('"Server error"', { binary: false });
+        ws.send('"Server error"', isBinary);
       }
-    });
-  });
+		},
+	});
 
-  console.log(`API on port ${port}`);
+	app.listen(port, (socket) => {
+		if (socket) logger.info(`API on port ${port}`);
+	});
 };
+
+const ab2str = (ab) => Buffer.from(ab).toString('utf-8');
